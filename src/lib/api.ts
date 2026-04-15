@@ -5,7 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 async function fetchApi<T>(
   path: string,
   options: RequestInit = {},
-  token?: string
+  token?: string | null
 ): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export async function getSnippets(params: {
   language?: string
   limit?: number
   offset?: number
-}, token: string): Promise<Snippet[]> {
+}, token?: string | null): Promise<Snippet[]> {
   const query = new URLSearchParams()
   if (params.search) query.set('search', params.search)
   if (params.tag) query.set('tag', params.tag)
@@ -58,7 +58,7 @@ export async function getSnippets(params: {
   return fetchApi<Snippet[]>(`/api/snippets?${query}`, {}, token)
 }
 
-export async function getSnippet(id: string, token: string): Promise<Snippet> {
+export async function getSnippet(id: string, token?: string | null): Promise<Snippet> {
   return fetchApi<Snippet>(`/api/snippets/${id}`, {}, token)
 }
 
@@ -75,7 +75,7 @@ export async function deleteSnippet(id: string, token: string): Promise<void> {
 }
 
 // Tags
-export async function getTags(token: string): Promise<Tag[]> {
+export async function getTags(token?: string | null): Promise<Tag[]> {
   return fetchApi<Tag[]>('/api/tags', {}, token)
 }
 

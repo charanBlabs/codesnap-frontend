@@ -1,18 +1,18 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { Search, SlidersHorizontal, Code2, Loader2, X } from 'lucide-react'
 import { Snippet, Tag, LANGUAGES } from '@/types'
 import { getSnippets, getTags, createSnippet, updateSnippet, deleteSnippet } from '@/lib/api'
 import { SnippetCard } from '@/components/SnippetCard'
+import { PublicSnippetCard } from '@/components/PublicSnippetCard'
 import { SnippetModal } from '@/components/SnippetModal'
 import { DeleteConfirmModal } from '@/components/DeleteConfirmModal'
 import { Navbar } from '@/components/Navbar'
+import { PublicNavbar } from '@/components/PublicNavbar'
 
 export default function HomePage() {
   const { data: session, status } = useSession()
-  const router = useRouter()
 
   const [snippets, setSnippets] = useState<Snippet[]>([])
   const [tags, setTags] = useState<Tag[]>([])
@@ -24,14 +24,10 @@ export default function HomePage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login')
-  }, [status, router])
-
+  const isAuthenticated = status === 'authenticated'
   const token = (session as any)?.accessToken
 
   const loadSnippets = useCallback(async () => {
-    if (!token) return
     setLoading(true)
     try {
       const data = await getSnippets({ search, tag: activeTag, language: activeLang }, token)
@@ -44,7 +40,6 @@ export default function HomePage() {
   }, [token, search, activeTag, activeLang])
 
   useEffect(() => {
-    if (!token) return
     getTags(token).then(setTags).catch(console.error)
   }, [token])
 
@@ -86,7 +81,7 @@ export default function HomePage() {
   const currentUserId = (session?.user as any)?.id || ''
   const isAdmin = (session?.user as any)?.role === 'admin'
 
-  if (status === 'loading' || status === 'unauthenticated') {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
@@ -96,11 +91,15 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <Navbar
-        userName={session?.user?.name || 'User'}
-        userRole={isAdmin ? 'admin' : 'member'}
-        onAddSnippet={() => setEditingSnippet(null)}
-      />
+      {isAuthenticated ? (
+        <Navbar
+          userName={session?.user?.name || 'User'}
+          userRole={isAdmin ? 'admin' : 'member'}
+          onAddSnippet={() => setEditingSnippet(null)}
+        />
+      ) : (
+        <PublicNavbar />
+      )}
 
       <main className="max-w-7xl mx-auto px-5 py-8">
         {/* Page heading */}
@@ -109,7 +108,7 @@ export default function HomePage() {
             Code Library
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-2)' }}>
-            {snippets.length} snippet{snippets.length !== 1 ? 's' : ''} · shared across your team
+            {snippets.length} snippet{snippets.length !== 1 ? 's' : ''} · {isAuthenticated ? 'shared across your team' : 'browse our public code collection'}
           </p>
         </div>
 
@@ -209,7 +208,7 @@ export default function HomePage() {
             <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>
               {hasFilters
                 ? 'Try clearing your filters or search'
-                : 'Add your first snippet to get started'}
+                : isAuthenticated ? 'Add your first snippet to get started' : 'Check back later for new content'}
             </p>
             {hasFilters && (
               <button onClick={clearFilters} className="btn-ghost mt-4" style={{ fontSize: '13px' }}>
@@ -220,21 +219,25 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger">
             {snippets.map(snippet => (
-              <SnippetCard
-                key={snippet.id}
-                snippet={snippet}
-                onEdit={s => setEditingSnippet(s)}
-                onDelete={id => setDeletingId(id)}
-                currentUserId={currentUserId}
-                isAdmin={isAdmin}
-              />
+              isAuthenticated ? (
+                <SnippetCard
+                  key={snippet.id}
+                  snippet={snippet}
+                  onEdit={s => setEditingSnippet(s)}
+                  onDelete={id => setDeletingId(id)}
+                  currentUserId={currentUserId}
+                  isAdmin={isAdmin}
+                />
+              ) : (
+                <PublicSnippetCard key={snippet.id} snippet={snippet} />
+              )
             ))}
           </div>
         )}
       </main>
 
-      {/* Add/Edit Modal */}
-      {editingSnippet !== undefined && (
+      {/* Add/Edit Modal - only for authenticated users */}
+      {isAuthenticated && editingSnippet !== undefined && (
         <SnippetModal
           snippet={editingSnippet}
           tags={tags}
@@ -243,8 +246,8 @@ export default function HomePage() {
         />
       )}
 
-      {/* Delete Confirm */}
-      {deletingId && (
+      {/* Delete Confirm - only for authenticated users */}
+      {isAuthenticated && deletingId && (
         <DeleteConfirmModal
           onConfirm={handleDelete}
           onCancel={() => setDeletingId(null)}
