@@ -2,6 +2,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { Code2, LogIn, LogOut, Plus, Users } from 'lucide-react'
 import Link from 'next/link'
+import { ThemeToggle } from './ThemeToggle'
 
 export function PublicNavbar() {
   const { data: session, status } = useSession()
@@ -24,6 +25,7 @@ export function PublicNavbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               <Link href="/" className="btn-primary" style={{ padding: '7px 14px', fontSize: '13px' }}>

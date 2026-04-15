@@ -8,6 +8,7 @@ import { SnippetCard } from '@/components/SnippetCard'
 import { PublicSnippetCard } from '@/components/PublicSnippetCard'
 import { SnippetModal } from '@/components/SnippetModal'
 import { DeleteConfirmModal } from '@/components/DeleteConfirmModal'
+import { ViewModal } from '@/components/ViewModal'
 import { Navbar } from '@/components/Navbar'
 import { PublicNavbar } from '@/components/PublicNavbar'
 
@@ -21,6 +22,7 @@ export default function HomePage() {
   const [activeTag, setActiveTag] = useState('')
   const [activeLang, setActiveLang] = useState('')
   const [editingSnippet, setEditingSnippet] = useState<Snippet | null | undefined>(undefined)
+  const [viewingSnippet, setViewingSnippet] = useState<Snippet | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -229,7 +231,11 @@ export default function HomePage() {
                   isAdmin={isAdmin}
                 />
               ) : (
-                <PublicSnippetCard key={snippet.id} snippet={snippet} />
+                <PublicSnippetCard 
+                  key={snippet.id} 
+                  snippet={snippet} 
+                  onClick={s => setViewingSnippet(s)}
+                />
               )
             ))}
           </div>
@@ -252,6 +258,14 @@ export default function HomePage() {
           onConfirm={handleDelete}
           onCancel={() => setDeletingId(null)}
           loading={deleteLoading}
+        />
+      )}
+
+      {/* View Modal - for read-only viewing */}
+      {viewingSnippet && (
+        <ViewModal
+          snippet={viewingSnippet}
+          onClose={() => setViewingSnippet(null)}
         />
       )}
     </div>

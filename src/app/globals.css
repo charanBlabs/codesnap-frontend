@@ -22,6 +22,25 @@
   --red:      #ff5f72;
 }
 
+/* Light Theme */
+[data-theme="light"] {
+  --bg:       #f8f9fc;
+  --bg-1:     #ffffff;
+  --bg-2:     #f1f3f7;
+  --bg-3:     #e8ebf0;
+  --border:   rgba(0,0,0,0.08);
+  --border-2: rgba(0,0,0,0.12);
+  --text:     #1a1d2e;
+  --text-2:   #5a5f73;
+  --text-3:   #8b91a8;
+  --accent:   #5b60e3;
+  --accent-2: #4a4fc7;
+  --accent-glow: rgba(91,96,227,0.15);
+  --green:    #10b981;
+  --yellow:   #f59e0b;
+  --red:      #ef4444;
+}
+
 * { box-sizing: border-box; }
 
 html, body {

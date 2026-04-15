@@ -1,26 +1,20 @@
 'use client'
 import { useState } from 'react'
-import { Copy, Check, Globe, User, Clock } from 'lucide-react'
+import { Copy, Check, Globe, User, Clock, FileCode2 } from 'lucide-react'
 import { Snippet } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
 
-const LANG_COLORS: Record<string, string> = {
-  php: '#8b5cf6', javascript: '#f59e0b', css: '#3b82f6',
-  html: '#f97316', sql: '#10b981', typescript: '#06b6d4',
-  python: '#84cc16', bash: '#ec4899', json: '#a3a3a3',
-}
-
 interface Props {
   snippet: Snippet
+  onClick?: (snippet: Snippet) => void
 }
 
-export function PublicSnippetCard({ snippet }: Props) {
+export function PublicSnippetCard({ snippet, onClick }: Props) {
   const [copied, setCopied] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
-  const langColor = LANG_COLORS[snippet.language] || '#a3a3a3'
-
-  async function copy() {
+  async function copy(e: React.MouseEvent) {
+    e.stopPropagation()
     await navigator.clipboard.writeText(snippet.code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -30,17 +24,22 @@ export function PublicSnippetCard({ snippet }: Props) {
   const hasMore = snippet.code.split('\n').length > 8
 
   return (
-    <div className="card flex flex-col" style={{ padding: '0' }}>
+    <div 
+      className="card flex flex-col cursor-pointer" 
+      style={{ padding: '0' }}
+      onClick={() => onClick?.(snippet)}
+    >
       {/* Header */}
       <div className="p-5 pb-3 flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          {/* Language badge */}
+          {/* Tags only */}
           <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-            <span className="tag-pill" style={{
-              background: `${langColor}18`,
-              color: langColor,
-              border: `1px solid ${langColor}30`,
+            <span className="tag-pill flex items-center gap-1" style={{
+              background: 'var(--bg-3)',
+              color: 'var(--text-2)',
+              border: '1px solid var(--border)',
             }}>
+              <FileCode2 size={11} />
               {snippet.language.toUpperCase()}
             </span>
             {snippet.tags.map(tag => (
@@ -64,7 +63,7 @@ export function PublicSnippetCard({ snippet }: Props) {
         </div>
 
         {/* Copy button only */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
           <button
             onClick={copy}
             className="btn-ghost"
@@ -107,7 +106,7 @@ export function PublicSnippetCard({ snippet }: Props) {
         </div>
         {hasMore && (
           <button
-            onClick={() => setExpanded(e => !e)}
+            onClick={(e) => { e.stopPropagation(); setExpanded(e => !e); }}
             className="text-xs mt-1.5"
             style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
           >

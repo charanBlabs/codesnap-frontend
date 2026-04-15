@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { Code2, LogOut, Users, ChevronDown, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { ThemeToggle } from './ThemeToggle'
 
 interface Props {
   userName: string
@@ -29,6 +30,8 @@ export function Navbar({ userName, userRole, onAddSnippet }: Props) {
 
         {/* Right */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
+          
           <button onClick={onAddSnippet} className="btn-primary" style={{ padding: '7px 14px', fontSize: '13px' }}>
             <Plus size={14} />
             Add Snippet
